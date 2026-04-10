@@ -1,0 +1,23 @@
+[Unit]
+Description=Contest Runtime - Deploy to local disk on first ISO boot
+# Runs before GDM so the user never sees the login screen during deployment.
+DefaultDependencies=no
+After=local-fs.target
+Before=display-manager.service
+# Skip in maintenance modes
+ConditionKernelCommandLine=!contest.uninstall
+ConditionKernelCommandLine=!contest.clean_home
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+# deploy.sh exits immediately if not booting from iso9660 (already on HDD)
+# so the overhead on normal HDD boots is negligible (~100ms).
+ExecStart=/usr/lib/contest/deploy.sh
+StandardOutput=journal+console
+StandardError=journal+console
+# Squashfs copy can take 5–15 min on slower media
+TimeoutStartSec=1800
+
+[Install]
+WantedBy=multi-user.target

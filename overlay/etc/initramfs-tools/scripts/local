@@ -1,0 +1,241 @@
+#!/bin/sh
+# shellcheck shell=sh
+
+# Custom initramfs local boot logic for the contest ISO.
+# It finds /contest/filesystem.squashfs on local media and mounts root as:
+#   overlay(lower=filesystem.squashfs, upper=media-or-tmpfs)
+
+local_top() {
+    if [ "${local_top_used:-no}" != "yes" ]; then
+        [ "${quiet:-n}" != "y" ] && log_begin_msg "Running /scripts/local-top"
+        run_scripts /scripts/local-top
+        [ "${quiet:-n}" != "y" ] && log_end_msg
+    fi
+    local_top_used=yes
+}
+
+local_premount() {
+    if [ "${local_premount_used:-no}" != "yes" ]; then
+        [ "${quiet:-n}" != "y" ] && log_begin_msg "Running /scripts/local-premount"
+        run_scripts /scripts/local-premount
+        [ "${quiet:-n}" != "y" ] && log_end_msg
+    fi
+    local_premount_used=yes
+}
+
+local_bottom() {
+    if [ "${local_top_used:-no}" = "yes" ] || [ "${local_premount_used:-no}" = "yes" ]; then
+        [ "${quiet:-n}" != "y" ] && log_begin_msg "Running /scripts/local-bottom"
+        run_scripts /scripts/local-bottom
+        [ "${quiet:-n}" != "y" ] && log_end_msg
+    fi
+    local_top_used=no
+    local_premount_used=no
+}
+
+parse_contest_cmdline() {
+    CONTEST_DIR="/contest"
+    CONTEST_ROOT="filesystem.squashfs"
+    CONTEST_PERSIST="auto"
+
+    for arg in $(cat /proc/cmdline); do
+        case "${arg}" in
+            contest_dir=*)
+                CONTEST_DIR="${arg#contest_dir=}"
+                ;;
+            contest_root=*)
+                CONTEST_ROOT="${arg#contest_root=}"
+                ;;
+            contest_persist=*)
+                CONTEST_PERSIST="${arg#contest_persist=}"
+                ;;
+        esac
+    done
+
+    case "${CONTEST_DIR}" in
+        /*) ;;
+        *) CONTEST_DIR="/${CONTEST_DIR}" ;;
+    esac
+}
+
+probe_media_with_fstype() {
+    dev="$1"
+    fstype="$2"
+
+    if ! mount -t "${fstype}" -o ro "${dev}" /run/contest-scan 2>/dev/null; then
+        return 1
+    fi
+
+    if [ -f "/run/contest-scan${CONTEST_DIR}/${CONTEST_ROOT}" ]; then
+        FOUND_DEV="${dev}"
+        FOUND_FSTYPE="${fstype}"
+        umount /run/contest-scan
+        return 0
+    fi
+
+    umount /run/contest-scan
+    return 1
+}
+
+find_contest_media() {
+    mkdir -p /run/contest-scan
+    : > /run/contest-candidates
+
+    for dev in /dev/disk/by-uuid/* /dev/disk/by-label/* /dev/nvme*n*p* /dev/sd*[0-9] /dev/vd*[0-9] /dev/mmcblk*p* /dev/sr0; do
+        [ -e "${dev}" ] || continue
+        real="$(readlink -f "${dev}" 2>/dev/null || echo "${dev}")"
+        [ -b "${real}" ] || continue
+        grep -qx "${real}" /run/contest-candidates 2>/dev/null || echo "${real}" >> /run/contest-candidates
+    done
+
+    while read -r dev; do
+        for fstype in ext4 ext3 ext2 xfs vfat exfat ntfs3 iso9660; do
+            if probe_media_with_fstype "${dev}" "${fstype}"; then
+                rm -f /run/contest-candidates
+                return 0
+            fi
+        done
+    done < /run/contest-candidates
+
+    rm -f /run/contest-candidates
+    return 1
+}
+
+select_overlay_mode() {
+    MEDIA_RW=0
+
+    # Build mount options per filesystem type (NTFS needs nls=utf8)
+    MEDIA_MOUNT_OPTS_RW="rw"
+    MEDIA_MOUNT_OPTS_RO="ro"
+    case "${FOUND_FSTYPE}" in
+        ntfs|ntfs3)
+            MEDIA_MOUNT_OPTS_RW="rw,nls=utf8"
+            MEDIA_MOUNT_OPTS_RO="ro,nls=utf8"
+            ;;
+    esac
+
+    if mount -t "${FOUND_FSTYPE}" -o "${MEDIA_MOUNT_OPTS_RW}" \
+            "${FOUND_DEV}" /run/contest-media 2>/dev/null; then
+        MEDIA_RW=1
+    elif mount -t "${FOUND_FSTYPE}" -o "${MEDIA_MOUNT_OPTS_RO}" \
+            "${FOUND_DEV}" /run/contest-media 2>/dev/null; then
+        MEDIA_RW=0
+    else
+        panic "Unable to mount contest media ${FOUND_DEV}"
+    fi
+
+    # ---- Forced no-persistence (cleanup boot or ISO boot) ----
+    case "${CONTEST_PERSIST}" in
+        off|false|no|0)
+            [ "${MEDIA_RW}" = "1" ] && \
+                mount -o remount,ro /run/contest-media 2>/dev/null || true
+            _use_tmpfs_overlay
+            return 0
+            ;;
+    esac
+
+    # ---- overlay.img: ext4 image stored on non-POSIX filesystems (NTFS etc.) ----
+    # deploy.sh creates this when the host filesystem does not support xattr.
+    # The initramfs loop-mounts it so overlayfs gets a proper ext4 upper dir.
+    OVERLAY_IMG="/run/contest-media${CONTEST_DIR}/overlay.img"
+    if [ "${MEDIA_RW}" = "1" ] && [ -f "${OVERLAY_IMG}" ]; then
+        modprobe loop 2>/dev/null || true
+        mkdir -p /run/contest-overlay
+        if mount -o loop "${OVERLAY_IMG}" /run/contest-overlay 2>/dev/null; then
+            mkdir -p /run/contest-overlay/upper /run/contest-overlay/work
+            UPPER_DIR="/run/contest-overlay/upper"
+            WORK_DIR="/run/contest-overlay/work"
+            return 0
+        else
+            panic "overlay.img found but cannot be loop-mounted"
+        fi
+    fi
+
+    # ---- Native persistence on ext4 / xfs ----
+    USE_PERSIST=0
+    case "${CONTEST_PERSIST}" in
+        on|true|yes|1)
+            USE_PERSIST=1
+            ;;
+        auto|*)
+            case "${FOUND_FSTYPE}" in
+                ext4|xfs) USE_PERSIST=1 ;;
+                *)        USE_PERSIST=0 ;;
+            esac
+            ;;
+    esac
+
+    if [ "${MEDIA_RW}" = "1" ] && [ "${USE_PERSIST}" = "1" ]; then
+        mkdir -p "/run/contest-media${CONTEST_DIR}/overlay-upper"
+        mkdir -p "/run/contest-media${CONTEST_DIR}/overlay-work"
+        UPPER_DIR="/run/contest-media${CONTEST_DIR}/overlay-upper"
+        WORK_DIR="/run/contest-media${CONTEST_DIR}/overlay-work"
+        return 0
+    fi
+
+    # ---- Fallback: tmpfs (read-only session, no persistence) ----
+    [ "${MEDIA_RW}" = "1" ] && \
+        mount -o remount,ro /run/contest-media 2>/dev/null || true
+    _use_tmpfs_overlay
+}
+
+_use_tmpfs_overlay() {
+    mount -t tmpfs tmpfs /run/contest-rw \
+        || panic "Cannot mount tmpfs for overlay working dirs"
+    mkdir -p /run/contest-rw/upper /run/contest-rw/work
+    UPPER_DIR="/run/contest-rw/upper"
+    WORK_DIR="/run/contest-rw/work"
+}
+
+mountroot() {
+    parse_contest_cmdline
+
+    local_top
+
+    wait_for_udev 10
+
+    modprobe loop >/dev/null 2>&1 || true
+    modprobe squashfs >/dev/null 2>&1 || true
+    modprobe overlay >/dev/null 2>&1 || true
+
+    if ! find_contest_media; then
+        panic "Contest root not found. Expected ${CONTEST_DIR}/${CONTEST_ROOT}"
+    fi
+
+    mkdir -p /run/contest-media /run/contest-lower /run/contest-rw
+
+    select_overlay_mode
+
+    ROOT_IMAGE="/run/contest-media${CONTEST_DIR}/${CONTEST_ROOT}"
+    if ! mount -o ro,loop "${ROOT_IMAGE}" /run/contest-lower; then
+        panic "Cannot mount squashfs root image: ${ROOT_IMAGE}"
+    fi
+
+    local_premount
+
+    if ! mount -t overlay overlay \
+        -o "lowerdir=/run/contest-lower,upperdir=${UPPER_DIR},workdir=${WORK_DIR}" \
+        "${rootmnt?}"; then
+        panic "Cannot mount overlay root"
+    fi
+
+    # Rootfs in squashfs excludes pseudo-fs mount points; recreate them here
+    # so initramfs can bind /dev, /proc, /sys and /run during switch_root.
+    for mp in dev proc sys run tmp; do
+        [ -d "${rootmnt?}/${mp}" ] || mkdir -p "${rootmnt?}/${mp}"
+    done
+    chmod 1777 "${rootmnt?}/tmp" 2>/dev/null || true
+}
+
+mount_top() {
+    local_top
+}
+
+mount_premount() {
+    local_premount
+}
+
+mount_bottom() {
+    # Keep /run mounts alive; initramfs-tools will move /run to the final root.
+    :
+}

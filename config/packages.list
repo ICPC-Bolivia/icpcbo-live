@@ -1,0 +1,114 @@
+systemd-sysv
+sudo
+locales
+
+# --- Core GNOME shell (minimal) ---
+gnome-shell
+gnome-session
+gnome-settings-daemon
+gnome-control-center
+gdm3
+nautilus
+gnome-terminal
+evince
+file-roller
+gnome-themes-extra
+
+# Wi-Fi and networking
+network-manager
+wpasupplicant
+wireless-regdb
+iw
+rfkill
+firmware-linux
+firmware-linux-free
+firmware-iwlwifi
+firmware-realtek
+firmware-atheros
+firmware-ath9k-htc
+firmware-brcm80211
+firmware-mediatek
+firmware-misc-nonfree
+
+# Boot/runtime
+linux-image-amd64
+initramfs-tools
+
+# Needed by current build flow (VSCode download/install)
+ca-certificates
+curl
+python3
+
+# Keyboard configuration
+console-setup
+
+# Lab deployment tools (deploy-to-disk + GRUB install from live system)
+efibootmgr
+grub-efi-amd64
+grub-pc-bin
+
+# --- System utilities ---
+net-tools
+openssh-server
+ansible
+xvfb
+oathtool
+imagemagick
+zabbix-agent2
+
+# --- Build tools ---
+build-essential
+autoconf
+autotools-dev
+python-is-python3
+clangd
+
+# --- Development tools and IDEs ---
+firefox-esr
+git
+ddd
+valgrind
+konsole
+geany
+geany-plugin-automark
+geany-plugin-lineoperations
+geany-plugin-overview
+emacs
+gedit
+joe
+kate
+kdevelop
+nano
+vim
+vim-gtk3
+cmake
+make
+gcc
+g++
+clang
+python3-pip
+python3-matplotlib
+python3-numpy
+ruby
+openjdk-17-jdk
+codeblocks
+unzip
+zip
+lsof
+strace
+htop
+tree
+manpages-dev
+aspell
+aspell-en
+aspell-es
+dict
+dictd
+dict-wn
+libwxgtk3.2-1
+neovim
+
+# --- Documentation and utilities ---
+python3-doc
+at
+fonts-recommended

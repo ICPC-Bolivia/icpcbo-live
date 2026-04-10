@@ -1,0 +1,16 @@
+# Optional overrides (copy to iso.local.conf)
+
+# ISO_NAME="icpc-bolivia-debian"
+# DEBIAN_SUITE="trixie"
+# DEBIAN_MIRROR="http://deb.debian.org/debian"
+# DEBIAN_SECURITY_MIRROR="http://security.debian.org/debian-security"
+# DEBIAN_COMPONENTS="main contrib non-free non-free-firmware"
+# META_DISTRO_ID="icpc-bolivia-debian"
+# META_DISTRO_NAME="ICPC Bolivia Debian"
+# META_DISTRO_VERSION="13"
+# DEFAULT_USER="icpc"
+# DEFAULT_PASSWORD="change-me"
+# HOSTNAME="contest"
+# TIMEZONE="UTC"
+# APT_PROXY="http://apt-cacher:3142"
+# APT_PROXY=""  # disable proxy

@@ -1,0 +1,24 @@
+services:
+  apt-cacher:
+    build:
+      context: .
+      dockerfile: docker/apt-cacher-ng/Dockerfile
+    volumes:
+      - ./apt_cacher_cache:/var/cache/apt-cacher-ng
+      - ./apt_cacher_logs:/var/log/apt-cacher-ng
+
+  builder:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    depends_on:
+      - apt-cacher
+    environment:
+      APT_PROXY: ${APT_PROXY-http://apt-cacher:3142}
+    privileged: true
+    volumes:
+      - ./output:/work/output
+      - ./download_cache:/work/download-cache
+      - ./config:/work/config
+      - ./scripts:/work/scripts
+      - ./overlay:/work/overlay

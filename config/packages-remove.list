@@ -1,0 +1,69 @@
+# Packages to purge after installation.
+# These may be pulled in as recommended or suggested deps of GNOME components
+# but are not needed in a contest environment.
+
+# --- System telemetry / cloud ---
+popularity-contest
+cloud-init
+snapd
+gnome-software-plugin-snap
+
+# --- Media players ---
+rhythmbox
+totem
+totem-plugins
+totem-common
+
+# --- Photo / camera / graphics ---
+cheese
+cheese-common
+shotwell
+eog
+gimp
+gimp-data
+gimp-help-common
+
+# --- GNOME apps not needed in contest ---
+gnome-calendar
+gnome-contacts
+gnome-clocks
+gnome-maps
+gnome-weather
+gnome-photos
+gnome-music
+gnome-video-effects
+baobab
+gnome-characters
+gnome-font-viewer
+gnome-color-manager
+yelp
+yelp-xsl
+
+# --- Games ---
+gnome-games
+gnome-sudoku
+gnome-mines
+gnome-chess
+gnome-mahjongg
+gnome-robots
+gnome-taquin
+gnome-tetravex
+five-or-more
+four-in-a-row
+quadrapassel
+iagno
+lightsoff
+swell-foop
+hitori
+tali
+gnome-2048
+gnome-nibbles
+
+# --- Email / office not needed ---
+thunderbird
+evolution
+evolution-data-server
+
+# --- Disk tools (not needed for contestants) ---
+gparted
+gnome-disk-utility

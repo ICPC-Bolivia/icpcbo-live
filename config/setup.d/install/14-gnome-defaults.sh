@@ -1,0 +1,39 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+# Configure dconf system profile so GNOME reads the system-db
+mkdir -p /etc/dconf/profile
+cat > /etc/dconf/profile/user <<'EOF'
+user-db:user
+system-db:local
+EOF
+
+# System dconf database: contestant defaults
+mkdir -p /etc/dconf/db/local.d
+cat > /etc/dconf/db/local.d/20-contestant-defaults <<'EOF'
+[org/gnome/shell]
+enabled-extensions=['stealmyfocus-ext']
+disable-user-extensions=false
+favorite-apps=['firefox-esr.desktop', 'org.gnome.Nautilus.desktop', 'org.gnome.Terminal.desktop']
+
+[org/gnome/desktop/input-sources]
+sources=[('xkb', 'latam')]
+per-window=false
+
+[org/gnome/desktop/session]
+idle-delay=uint32 900
+
+[org/gnome/desktop/screensaver]
+lock-enabled=true
+lock-delay=uint32 30
+
+[org/gnome/desktop/background]
+picture-uri='file:///opt/contestant-vm/misc/icpcbo-wallpaper.png'
+picture-uri-dark='file:///opt/contestant-vm/misc/icpcbo-wallpaper.png'
+picture-options='centered'
+primary-color='#000000'
+secondary-color='#000000'
+EOF
+
+dconf update || true
