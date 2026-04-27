@@ -63,6 +63,7 @@ assert_file "scripts/setup.d/23-update-config.sh"
 assert_file "scripts/setup.d/80-apt-policy.sh"
 assert_file "scripts/setup.d/90-initramfs.sh"
 assert_file "config/iso.local.conf.sample"
+assert_file "overlay/etc/initramfs-tools/hooks/contest-overlay-tools"
 assert_file "overlay/etc/systemd/system/contest-deploy.service"
 assert_file "overlay/etc/systemd/system/contest-full-install.service"
 assert_file "overlay/etc/systemd/system/contest-overlay-provision.service"
@@ -87,6 +88,7 @@ assert_file "scripts/build/install-and-customize-chroot.sh"
 assert_file "scripts/build/trim-chroot.sh"
 
 assert_executable "overlay/usr/lib/contest/deploy.sh"
+assert_executable "overlay/etc/initramfs-tools/hooks/contest-overlay-tools"
 assert_executable "overlay/usr/lib/contest/provision-overlay.sh"
 assert_executable "overlay/usr/lib/contest/update.sh"
 assert_executable "overlay/usr/lib/contest/rollback.sh"
@@ -123,6 +125,11 @@ assert_package "firmware-brcm80211"
 assert_package "firmware-mediatek"
 assert_package "firmware-misc-nonfree"
 assert_package "e2fsprogs"
+
+grep -q 'copy_required_binary truncate' "${PROJECT_DIR}/overlay/etc/initramfs-tools/hooks/contest-overlay-tools" || \
+    fail "initramfs hook must bundle truncate for first-boot overlay creation"
+grep -q 'copy_contest_binary mke2fs /usr/lib/contest-initramfs/bin/mke2fs.real' "${PROJECT_DIR}/overlay/etc/initramfs-tools/hooks/contest-overlay-tools" || \
+    fail "initramfs hook must bundle mke2fs for first-boot overlay creation"
 
 search_paths=()
 for path in \

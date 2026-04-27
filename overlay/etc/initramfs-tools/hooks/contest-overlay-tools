@@ -1,0 +1,52 @@
+#!/bin/sh
+
+set -eu
+
+PREREQ=""
+
+prereqs() {
+    echo "${PREREQ}"
+}
+
+case "${1:-}" in
+    prereqs)
+        prereqs
+        exit 0
+        ;;
+esac
+
+. /usr/share/initramfs-tools/hook-functions
+
+copy_required_binary() {
+    tool="$1"
+    tool_path="$(command -v "${tool}" 2>/dev/null || true)"
+
+    if [ -z "${tool_path}" ]; then
+        echo "W: contest-overlay-tools: missing required binary: ${tool}" >&2
+        exit 1
+    fi
+
+    copy_exec "${tool_path}"
+}
+
+copy_contest_binary() {
+    tool="$1"
+    target="$2"
+    tool_path="$(command -v "${tool}" 2>/dev/null || true)"
+
+    if [ -z "${tool_path}" ]; then
+        echo "W: contest-overlay-tools: missing required binary: ${tool}" >&2
+        exit 1
+    fi
+
+    copy_exec "${tool_path}" "${target}"
+}
+
+# Portable installs on NTFS/vfat/exFAT need these during early boot so the
+# very first post-install session can create and mount overlay.img.
+copy_required_binary truncate
+copy_contest_binary mke2fs /usr/lib/contest-initramfs/bin/mke2fs.real
+
+if [ -f /etc/mke2fs.conf ]; then
+    copy_file config /etc/mke2fs.conf
+fi

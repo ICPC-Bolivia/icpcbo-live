@@ -89,7 +89,7 @@ write_runtime_grub_entry() {
     {
         printf 'menuentry "%s (folder mode)" {\n' "${ISO_NAME}"
         printf '    '
-        grub_linux_line "auto" "splash" "hdd"
+        grub_linux_line "auto" "splash" "hdd" "contest.persist_scope=home"
         printf '    initrd %s\n' "$(grub_initrd_path)"
         echo '}'
     } > "${file}"
@@ -134,14 +134,28 @@ EOF
 
     append_grub_hdd_menuentry \
         "${file}" \
-        "Iniciar ICPC Bolivia" \
-        "hdd_root" "on" "splash"
+        "Iniciar ICPC BO (persistencia del home)" \
+        "hdd_root" "on" "splash" \
+        "contest.persist_scope=home"
+
+    append_grub_hdd_menuentry \
+        "${file}" \
+        "Limpiar home" \
+        "hdd_root" "on" "plain" \
+        "contest.persist_scope=home" \
+        "contest.reset_home=1"
+
+    append_grub_hdd_menuentry \
+        "${file}" \
+        "Borrar archivos de instalacion" \
+        "hdd_root" "on" "plain" \
+        "contest.clean_install=1"
 
     append_grub_menuentry \
         "${file}" \
-        "Reinstalar ICPC Bolivia" \
+        "Probar live (sin persistencia)" \
         "iso" "off" "plain" \
-        "contest.reinstall=1"
+        "contest.install_mode=live"
 
     cat >> "${file}" <<'EOF'
 else
@@ -151,8 +165,28 @@ EOF
 
     append_grub_menuentry \
         "${file}" \
-        "ICPC BO" \
-        "iso" "off" "plain"
+        "Iniciar ICPC BO (persistencia del home)" \
+        "iso" "on" "splash" \
+        "contest.persist_scope=home"
+
+    append_grub_menuentry \
+        "${file}" \
+        "Limpiar home" \
+        "iso" "on" "plain" \
+        "contest.persist_scope=home" \
+        "contest.reset_home=1"
+
+    append_grub_menuentry \
+        "${file}" \
+        "Borrar archivos de instalacion" \
+        "iso" "on" "plain" \
+        "contest.clean_install=1"
+
+    append_grub_menuentry \
+        "${file}" \
+        "Probar live (sin persistencia)" \
+        "iso" "off" "plain" \
+        "contest.install_mode=live"
 
     cat >> "${file}" <<'EOF'
 fi
