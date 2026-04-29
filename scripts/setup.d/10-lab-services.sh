@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
-# Prepares the lab deployment services that run in the live system.
-# - contest-full-install.service : full disk install (unsquashfs + GRUB) on contest.install_mode=full
-# - contest-deploy.service       : overlay install (squashfs copy) on first ISO boot
+# Prepara los servicios de despliegue del laboratorio que corren en el sistema en vivo.
+# - contest-full-install.service : instalación completa a disco
+#   (unsquashfs + GRUB) con contest.install_mode=full
+# - contest-deploy.service       : instalación por overlay
+#   (copia del squashfs) en el primer arranque del ISO
 
 set -euo pipefail
 
@@ -9,4 +11,4 @@ systemctl enable contest-full-install.service
 systemctl enable contest-deploy.service
 systemctl enable contest-overlay-provision.service
 systemctl enable contest-update.service
-systemctl enable icp-report.timer
+systemctl enable stats-report.timer

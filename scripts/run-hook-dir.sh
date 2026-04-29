@@ -1,10 +1,11 @@
 #!/usr/bin/env bash
-# Run all regular files in a directory as bash hooks, sorted by filename.
-# Usage: run-hook-dir.sh <directory>
+# Ejecuta todos los archivos regulares de un directorio como hooks de bash,
+# ordenados por nombre de archivo.
+# Uso: run-hook-dir.sh <directorio>
 #
-# This script is copied into the chroot during the build and sourced by
-# both phase_install_and_customize and phase_trim. Extracting it here
-# eliminates the duplicate inline function definitions in build.sh.
+# Este script se copia dentro del chroot durante el build y es usado por
+# phase_install_and_customize y phase_trim. Tenerlo aquí elimina las
+# definiciones inline duplicadas dentro de build.sh.
 
 set -euo pipefail
 

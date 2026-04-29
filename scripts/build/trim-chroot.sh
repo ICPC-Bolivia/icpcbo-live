@@ -2,7 +2,8 @@
 
 set -euo pipefail
 
-# Read packages to remove line by line to avoid word-splitting on the list.
+# Lee los paquetes a eliminar línea por línea para evitar separación
+# incorrecta de palabras dentro de la lista.
 REMOVE_PKGS=()
 while IFS= read -r pkg; do
     case "${pkg}" in

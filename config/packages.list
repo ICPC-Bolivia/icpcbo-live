@@ -66,53 +66,30 @@ build-essential
 autoconf
 autotools-dev
 python-is-python3
-clangd
 
 # --- Development tools and IDEs ---
 firefox-esr
 git
-ddd
-valgrind
-konsole
 geany
 geany-plugin-automark
 geany-plugin-lineoperations
 geany-plugin-overview
 emacs
 gedit
-joe
 kate
-kdevelop
 nano
 vim
 vim-gtk3
-cmake
 make
 gcc
 g++
-clang
-python3-pip
-python3-matplotlib
-python3-numpy
-ruby
 openjdk-21-jdk
 openjdk-21-doc
 codeblocks
-unzip
-zip
-lsof
-strace
 htop
-tree
+
 manpages-dev
-aspell
-aspell-en
-aspell-es
-dict
-dictd
-dict-wn
 libwxgtk3.2-1
-neovim
 
 # --- Documentation and utilities ---
 python3-doc

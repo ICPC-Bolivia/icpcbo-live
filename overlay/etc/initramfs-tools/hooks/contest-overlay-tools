@@ -22,7 +22,7 @@ copy_required_binary() {
     tool_path="$(command -v "${tool}" 2>/dev/null || true)"
 
     if [ -z "${tool_path}" ]; then
-        echo "W: contest-overlay-tools: missing required binary: ${tool}" >&2
+        echo "W: contest-overlay-tools: falta el binario requerido: ${tool}" >&2
         exit 1
     fi
 
@@ -35,15 +35,17 @@ copy_contest_binary() {
     tool_path="$(command -v "${tool}" 2>/dev/null || true)"
 
     if [ -z "${tool_path}" ]; then
-        echo "W: contest-overlay-tools: missing required binary: ${tool}" >&2
+        echo "W: contest-overlay-tools: falta el binario requerido: ${tool}" >&2
         exit 1
     fi
 
     copy_exec "${tool_path}" "${target}"
 }
 
-# Portable installs on NTFS/vfat/exFAT need these during early boot so the
-# very first post-install session can create and mount overlay.img.
+# Las instalaciones portables sobre NTFS/vfat/exFAT necesitan estas
+# herramientas durante el arranque temprano para que la primera sesión
+# posterior a la instalación pueda crear y montar overlay.img.
+# Referencia: https://manpages.debian.org/testing/initramfs-tools-core/initramfs-tools.7.en.html
 copy_required_binary truncate
 copy_contest_binary mke2fs /usr/lib/contest-initramfs/bin/mke2fs.real
 

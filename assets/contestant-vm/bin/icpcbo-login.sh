@@ -4,12 +4,12 @@ set -euo pipefail
 
 ZEN_TITLE="ICPC Bolivia"
 ZEN_WIDTH="--width=420"
-STATE_DIR="${XDG_STATE_HOME:-${HOME}/.local/state}/icpcbo"
-STATE_FILE="${STATE_DIR}/user-id.txt"
-USERNAME_FILE="${STATE_DIR}/username.txt"
-DISPLAY_FILE="${STATE_DIR}/display-name.txt"
-RAW_RESPONSE_FILE="${STATE_DIR}/auth-response.json"
-WALLPAPER_FILE="${STATE_DIR}/login-wallpaper.svg"
+STATE_DIR="/home/icpc/.local/state/icpcbo"
+STATE_FILE="/home/icpc/.local/state/icpcbo/user-id.txt"
+USERNAME_FILE="/home/icpc/.local/state/icpcbo/username.txt"
+DISPLAY_FILE="/home/icpc/.local/state/icpcbo/display-name.txt"
+RAW_RESPONSE_FILE="/home/icpc/.local/state/icpcbo/auth-response.json"
+WALLPAPER_FILE="/home/icpc/.local/state/icpcbo/login-wallpaper.svg"
 AUTH_ENV_FILE="/etc/contestiso/auth.env"
 
 AUTH_SERVICE_URL="${AUTH_SERVICE_URL:-}"

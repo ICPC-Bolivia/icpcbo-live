@@ -5,14 +5,14 @@ set -euo pipefail
 GNOME_INPUT_SOURCES_VAL="${GNOME_INPUT_SOURCES:-[('xkb', 'latam'), ('xkb', 'us')]}"
 OPT_DIR="${OPT_CONTEST_DIR:-/opt/icpc}"
 
-# Configure dconf system profile so GNOME reads the system-db
+# Configura el perfil de sistema de dconf para que GNOME lea la base de datos del sistema
 mkdir -p /etc/dconf/profile
 cat > /etc/dconf/profile/user <<'EOF'
 user-db:user
 system-db:local
 EOF
 
-# System dconf database: contestant defaults
+# Base de datos dconf del sistema: valores por defecto para el concursante
 mkdir -p /etc/dconf/db/local.d
 cat > /etc/dconf/db/local.d/20-contestant-defaults <<'EOF'
 [org/gnome/shell]

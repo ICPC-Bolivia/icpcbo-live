@@ -12,13 +12,14 @@ fi
 
 mkdir -p "${FIREFOX_DIR}/defaults/pref"
 
-# Enable autoconfig
+# Habilitar configuración automática
 cat > "${FIREFOX_DIR}/defaults/pref/icpcbo-autoconfig.js" <<'EOF'
 pref("general.config.filename", "icpcbo.cfg");
 pref("general.config.obscure_value", 0);
 EOF
 
-# Autoconfig preferences (first non-comment line is skipped by Firefox — start with comment)
+# Preferencias de configuración automática
+# (Firefox omite la primera línea que no sea comentario; por eso se empieza con comentario)
 cat > "${FIREFOX_DIR}/icpcbo.cfg" <<EOF
 // Default homepage: local contest documentation
 defaultPref("browser.startup.homepage", "${DEFAULT_BROWSER_URL_VAL}");

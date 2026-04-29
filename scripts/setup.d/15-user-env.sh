@@ -6,19 +6,20 @@ DEFAULT_USER_VAL="${DEFAULT_USER:-icpc}"
 OPT_DIR="${OPT_CONTEST_DIR:-/opt/icpc}"
 
 # ----------------------------------------------------------------
-# /etc/skel setup — applied to user home by build.sh after hooks
+# Configuración de /etc/skel
+# aplicada al directorio personal del usuario por build.sh después de los hooks
 # ----------------------------------------------------------------
 
 mkdir -p /etc/skel/.config
 
-# Skip GNOME initial setup wizard for new users
+# Omitir el asistente inicial de GNOME para usuarios nuevos
 echo yes > /etc/skel/.config/gnome-initial-setup-done
 
-# VSCode default settings
+# Configuración por defecto de VS Code
 mkdir -p /etc/skel/.config/Code/User
 cat > /etc/skel/.config/Code/User/settings.json <<'EOM'
 {
-    "C_Cpp.default.cppStandard": "gnu++17",
+    "C_Cpp.default.cppStandard": "gnu++20",
     "editor.fontSize": 14,
     "editor.tabSize": 4,
     "editor.insertSpaces": true,
@@ -26,7 +27,7 @@ cat > /etc/skel/.config/Code/User/settings.json <<'EOM'
 }
 EOM
 
-# Desktop shortcuts
+# Accesos directos del escritorio
 mkdir -p /etc/skel/Desktop
 if [ -f "${OPT_DIR}/misc/icpcbo.desktop" ]; then
     cp "${OPT_DIR}/misc/icpcbo.desktop" /etc/skel/Desktop/
@@ -37,36 +38,24 @@ if [ -f /usr/share/applications/gnome-keyboard-panel.desktop ]; then
     chmod +x /etc/skel/Desktop/gnome-keyboard-panel.desktop
 fi
 
-# Add contest tools to PATH and set aliases
+# Agregar herramientas del concurso al PATH y definir alias
 cat >> /etc/skel/.bashrc <<EOF
 
-# ICPC Bolivia contest tools
+# Herramientas del concurso ICPC Bolivia
 export PATH="\${PATH}:${OPT_DIR}/bin"
 alias icpcboconf='sudo ${OPT_DIR}/bin/icpcboconf.sh'
 alias icpcbobackup='sudo ${OPT_DIR}/bin/icpcbobackup.sh'
 EOF
 
-# Set timezone from contest config at login
-cat >> /etc/skel/.profile <<EOF
-
-# ICPC Bolivia: apply contest timezone if configured
-_tz_file="${OPT_DIR}/config/timezone"
-if [ -f "\${_tz_file}" ]; then
-    TZ=\$(cat "\${_tz_file}")
-    export TZ
-fi
-unset _tz_file
-EOF
-
 # ----------------------------------------------------------------
-# System-wide PATH for all users
+# Variable PATH global del sistema para todos los usuarios
 # ----------------------------------------------------------------
 cat > /etc/profile.d/icpc.sh <<EOF
 export PATH="\${PATH}:${OPT_DIR}/bin"
 EOF
 
 # ----------------------------------------------------------------
-# GNOME autostart entry
+# Entrada de autoarranque de GNOME
 # ----------------------------------------------------------------
 if [ -f "${OPT_DIR}/misc/icpcbostart.desktop" ]; then
     mkdir -p /usr/share/gnome/autostart
@@ -74,7 +63,8 @@ if [ -f "${OPT_DIR}/misc/icpcbostart.desktop" ]; then
 fi
 
 # ----------------------------------------------------------------
-# Sudoers: allow contestant user to run contest tools as root
+# Sudoers: permitir que el usuario concursante ejecute
+# herramientas del concurso como root
 # ----------------------------------------------------------------
 cat > /etc/sudoers.d/contestant-vm <<SUDO
 ${DEFAULT_USER_VAL} ALL=(root) NOPASSWD: ${OPT_DIR}/bin/icpcboconf.sh
@@ -84,9 +74,10 @@ SUDO
 chmod 440 /etc/sudoers.d/contestant-vm
 
 # ----------------------------------------------------------------
-# Apply directly to the user that already exists in the chroot
-# (build.sh will later also copy skel, overwriting these files —
-#  writing here ensures correctness even if skel logic changes)
+# Aplicar directamente al usuario que ya existe dentro del chroot
+# (build.sh copiará luego skel y sobrescribirá estos archivos;
+#  escribir aquí asegura el resultado correcto incluso si cambia
+#  la lógica de skel)
 # ----------------------------------------------------------------
 if id -u "${DEFAULT_USER_VAL}" >/dev/null 2>&1; then
     user_home="$(getent passwd "${DEFAULT_USER_VAL}" | cut -d: -f6)"

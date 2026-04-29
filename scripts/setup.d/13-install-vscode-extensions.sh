@@ -9,8 +9,8 @@ VSCODE_CPPT_VERSION="1.24.5"
 VSCODE_VIM_VERSION="1.32.4"
 #VSCODE_CLANGD_VERSION="0.4.0"
 VSCODE_INTELLIJ_VERSION="1.7.7"
-# Java extension version includes a build number (e.g. 1.42.0-561).
-# Update both variables together when bumping the release.
+# La extensión de Java incluye un número de build
+# (por ejemplo 1.42.0-561).
 VSCODE_JAVA_VERSION="1.54.0"
 VSCODE_JAVA_BUILD="561"
 KOTLIN_LSP_API_URL="https://api.github.com/repos/Kotlin/kotlin-lsp/releases/latest"

@@ -31,8 +31,9 @@ if [ "${#PKGS[@]}" -gt 0 ]; then
     apt-get install -y "${PKGS[@]}"
 fi
 
-# Install VSCode (always latest stable). The first pass may fail with unmet
-# dependencies; apt-get -f install resolves them, then the second pass succeeds.
+# Instala VS Code (siempre la versión estable más reciente). La primera pasada
+# puede fallar por dependencias no resueltas; apt-get -f install las corrige y
+# luego la segunda pasada completa la instalación.
 /tmp/cached-curl.sh "https://code.visualstudio.com/sha/download?build=stable&os=linux-deb-x64" \
     /tmp/code.deb
 apt-get install -y /tmp/code.deb || {
@@ -43,10 +44,11 @@ rm -f /tmp/code.deb
 
 /tmp/run-hook-dir.sh /tmp/setup.d
 
-# Ensure the default user exists even if hooks are customized or disabled.
+# Asegura que el usuario por defecto exista incluso si los hooks fueron
+# personalizados o deshabilitados.
 id -u "${DEFAULT_USER}" >/dev/null 2>&1 || \
     useradd -m -s /bin/bash -G sudo,audio,video "${DEFAULT_USER}"
 
-# Propagate /etc/skel to the user home directory.
+# Copia el contenido de /etc/skel al directorio personal del usuario.
 cp -a /etc/skel/. "/home/${DEFAULT_USER}/"
 chown -R "${DEFAULT_USER}:${DEFAULT_USER}" "/home/${DEFAULT_USER}"

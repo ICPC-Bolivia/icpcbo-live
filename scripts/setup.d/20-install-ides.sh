@@ -10,23 +10,6 @@ INTELLIJ_IDEA_VERSION="2024.2.3"
 
 mkdir -p "${CACHE_DIR}"
 
-# Sublime Text
-if ! command -v subl >/dev/null 2>&1; then
-    if /tmp/cached-curl.sh https://download.sublimetext.com/sublimehq-pub.gpg \
-            /tmp/sublimehq.gpg 2>/dev/null; then
-        gpg --dearmor < /tmp/sublimehq.gpg \
-            > /usr/share/keyrings/sublimehq-archive-keyring.gpg
-        rm -f /tmp/sublimehq.gpg
-        echo "deb [arch=amd64 signed-by=/usr/share/keyrings/sublimehq-archive-keyring.gpg] \
-https://download.sublimetext.com/ apt/stable/" \
-            > /etc/apt/sources.list.d/sublime-text.list
-        apt-get update -qq
-        apt-get install -y sublime-text || echo "W: Sublime Text install failed" >&2
-    else
-        echo "W: Failed to fetch Sublime Text GPG key, skipping" >&2
-    fi
-fi
-
 # Eclipse C/C++
 ECLIPSE_CPP_NAME="eclipse-cpp-${ECLIPSE_CPP_VERSION}-R-linux-gtk-x86_64"
 ECLIPSE_CPP_URL="https://archive.eclipse.org/technology/epp/downloads/release/${ECLIPSE_CPP_VERSION}/R/${ECLIPSE_CPP_NAME}.tar.gz"
@@ -58,34 +41,7 @@ EOF
     fi
 fi
 
-# Eclipse Installer (Java IDE setup)
-ECLIPSE_INST_URL="https://download.eclipse.org/oomph/products/latest/eclipse-inst-jre-linux64.tar.gz"
-                  
-if [ ! -d /opt/eclipse-installer-java ]; then
-    if /tmp/cached-curl.sh "${ECLIPSE_INST_URL}" "${CACHE_DIR}/eclipse-installer.tar.gz"; then
-        tar -zxf "${CACHE_DIR}/eclipse-installer.tar.gz" -C /opt
-        if [ -d /opt/eclipse-installer ]; then
-            mv /opt/eclipse-installer /opt/eclipse-installer-java
-            icon_src="$(find /opt/eclipse-installer-java \
-                -name '*.xpm' -o -name 'icon*.png' 2>/dev/null | head -1)"
-            [ -n "${icon_src}" ] && cp "${icon_src}" /usr/share/pixmaps/eclipse-installer.png
-
-            cat > /usr/share/applications/eclipse_installer.desktop <<'EOF'
-[Desktop Entry]
-Name=Eclipse Installer (Java)
-Exec=/opt/eclipse-installer-java/eclipse-inst
-Type=Application
-Icon=eclipse-installer
-Categories=Development;IDE;
-Terminal=false
-EOF
-        fi
-    else
-        echo "W: Eclipse Installer download failed" >&2
-    fi
-fi
-
-# Kotlin compiler
+# Compilador de Kotlin
 KOTLIN_COMPILER_URL="https://github.com/JetBrains/kotlin/releases/download/v${KOTLIN_COMPILER_VERSION}/kotlin-compiler-${KOTLIN_COMPILER_VERSION}.zip"
 KOTLIN_COMPILER_DST="/opt/kotlinc-${KOTLIN_COMPILER_VERSION}"
 if [ ! -d "${KOTLIN_COMPILER_DST}" ]; then
@@ -103,7 +59,8 @@ if [ ! -d "${KOTLIN_COMPILER_DST}" ]; then
     fi
 fi
 
-# IntelliJ IDEA Community (official Kotlin IDE used in ICPC environments)
+# IntelliJ IDEA Community
+# Entorno de desarrollo oficial de Kotlin usado en entornos tipo ICPC
 INTELLIJ_ARCHIVE="ideaIC-${INTELLIJ_IDEA_VERSION}.tar.gz"
 INTELLIJ_URL="https://download.jetbrains.com/idea/${INTELLIJ_ARCHIVE}"
 INTELLIJ_DIR="/opt/intellij-idea-community"

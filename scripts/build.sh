@@ -85,8 +85,8 @@ copy_setup_hooks() {
     cp -a "${src}/." "${dst}/"
 }
 
-# Copy host-side build helper scripts into the chroot so both chroot sessions
-# can use them without duplicating their definitions inline.
+# Copia scripts auxiliares del host dentro del chroot para que ambas
+# sesiones del chroot puedan usarlos sin duplicar sus definiciones en línea.
 copy_chroot_scripts() {
     copy_to_rootfs_tmp "${SCRIPT_DIR}/run-hook-dir.sh"
     copy_to_rootfs_tmp "${SCRIPT_DIR}/cached-curl.sh"
@@ -215,7 +215,6 @@ phase_install_and_customize() {
         OPT_CONTEST_DIR="${OPT_CONTEST_DIR}" \
         ICP_REPORT_URL="${ICP_REPORT_URL}" \
         ICP_REPORT_TIMEOUT="${ICP_REPORT_TIMEOUT}" \
-        ICP_REPORT_BACKEND_HOST="${ICP_REPORT_BACKEND_HOST}" \
         DOWNLOAD_CACHE_DIR=/work/download-cache
 }
 
@@ -326,18 +325,19 @@ phase_build_iso() {
 
     cp -a "${kernel_source}" "${ISO_STAGING_DIR}/${CONTEST_DIR}/vmlinuz"
     cp -a "${initrd_source}" "${ISO_STAGING_DIR}/${CONTEST_DIR}/initrd.img"
-    # Use a hardlink when both paths are on the same filesystem (container /tmp).
-    # This avoids duplicating the 3+ GB squashfs image and prevents xorriso from
-    # failing with "Image size exceeds free space on media".
+    # Usa un hardlink cuando ambas rutas están en el mismo sistema de archivos
+    # (por ejemplo /tmp del contenedor). Esto evita duplicar la imagen squashfs
+    # de más de 3 GB y previene fallos de xorriso por falta de espacio.
     ln "${squashfs_source}" \
         "${ISO_STAGING_DIR}/${CONTEST_DIR}/${ROOT_SQUASH_NAME}" 2>/dev/null || \
         cp -a "${squashfs_source}" \
             "${ISO_STAGING_DIR}/${CONTEST_DIR}/${ROOT_SQUASH_NAME}"
 
-    # The ISO's GRUB is the single bootloader for both ISO and HDD.
-    # It searches for the deploy marker (.contest-installed) on any local
-    # partition. If found → boot from HDD with persistence. If not → first
-    # boot from ISO, which triggers deploy.sh to copy files to the HDD.
+    # El GRUB del ISO es el único cargador de arranque tanto para el ISO
+    # como para el disco. Busca el marcador de despliegue (.contest-installed)
+    # en cualquier partición local. Si lo encuentra, arranca desde disco con
+    # persistencia. Si no, arranca desde el ISO y eso dispara deploy.sh para
+    # copiar los archivos al disco.
     write_iso_grub_cfg "${ISO_STAGING_DIR}/boot/grub/grub.cfg"
 
     grub-mkrescue -o "${iso_file}" "${ISO_STAGING_DIR}" >/tmp/grub-mkrescue.log 2>&1 || {
@@ -347,9 +347,9 @@ phase_build_iso() {
 
     sha256sum "${iso_file}" > "${iso_file}.sha256"
 
-    # The runtime folder (squashfs + kernel + initrd) is already embedded in the
-    # ISO. Copying it separately to output/ costs another 3+ GB on the host
-    # volume. Set OUTPUT_RUNTIME=1 to opt in to the separate copy.
+    # La carpeta runtime (squashfs + kernel + initrd) ya está embebida en el
+    # ISO. Copiarla por separado a output/ consume otros 3+ GB en el volumen
+    # del host. Define OUTPUT_RUNTIME=1 si quieres habilitar esa copia extra.
     if [[ "${OUTPUT_RUNTIME:-0}" == "1" ]]; then
         rm -rf "${OUTPUT_DIR}/${CONTEST_DIR}"
         cp -a "${runtime_target}" "${OUTPUT_DIR}/"

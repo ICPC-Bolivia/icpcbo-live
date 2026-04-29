@@ -7,7 +7,7 @@ if [ -f "/usr/lib/systemd/system/atd.service" ]; then
     unit_file="/usr/lib/systemd/system/atd.service"
 fi
 
-# Keep the at package installed but disable automatic start in the image.
+# Mantener instalado el paquete at, pero desactivar su arranque automático en la imagen.
 rm -f /etc/systemd/system/multi-user.target.wants/atd.service
 
 cat > "${unit_file}" <<'EOM'

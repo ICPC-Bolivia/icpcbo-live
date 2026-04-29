@@ -1,0 +1,6 @@
+[Unit]
+Description=Stats Report Sender
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/stats-send.sh

@@ -21,7 +21,8 @@ update-locale LANG="${LOCALE_VAL}"
 ln -sf "/usr/share/zoneinfo/${TIMEZONE_VAL}" /etc/localtime
 echo "${TIMEZONE_VAL}" > /etc/timezone
 
-# Keyboard layout for console and X11 (read by keyboard-setup.service at boot)
+# Distribución de teclado para consola y X11
+# (leída por keyboard-setup.service durante el arranque)
 cat > /etc/default/keyboard <<KEYBOARD_EOF
 XKBMODEL="pc105"
 XKBLAYOUT="${KEYBOARD_LAYOUT_VAL}"

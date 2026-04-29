@@ -1,10 +1,10 @@
 [Unit]
-Description=Run ICP report every 10 minutes
+Description=Run stats report every 10 minutes
 
 [Timer]
 OnBootSec=2min
 OnUnitActiveSec=10min
-Unit=icp-report.service
+Unit=stats-report.service
 
 [Install]
 WantedBy=timers.target
