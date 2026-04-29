@@ -6,8 +6,8 @@ services:
     ports:
       - "3142:3142"
     volumes:
-      - ./apt_cacher_cache:/var/cache/apt-cacher-ng
-      - ./apt_cacher_logs:/var/log/apt-cacher-ng
+      - ./tmp/apt-cacher/cache:/var/cache/apt-cacher-ng
+      - ./tmp/apt-cacher/logs:/var/log/apt-cacher-ng
     restart: unless-stopped
 
   iso-local-conf-viewer:
@@ -21,5 +21,5 @@ services:
       - "8081:8081"
     volumes:
       - ./remote:/work/remote:ro
-      - ./updates:/work/updates:ro
+      - ./tmp/updates:/work/updates:ro
     restart: unless-stopped

@@ -11,37 +11,33 @@ source "${SCRIPT_DIR}/lib.sh"
 # shellcheck source=../config/iso.conf
 source "${PROJECT_DIR}/config/iso.conf"
 
-if [[ -f "${PROJECT_DIR}/config/iso.local.conf" ]]; then
-    # shellcheck source=/dev/null
-    source "${PROJECT_DIR}/config/iso.local.conf"
-fi
-
-resolve_output_path() {
+resolve_project_path() {
     local path="$1"
-    local fallback_name="$2"
+    local fallback_path="$2"
 
     if [[ "${path}" == /work/* ]] && { [[ ! -d /work ]] || [[ ! -w /work ]]; }; then
-        path="${PROJECT_DIR}/${fallback_name}"
+        path="${fallback_path}"
     fi
 
     if [[ -e "${path}" ]]; then
         if [[ ! -w "${path}" ]]; then
-            path="${PROJECT_DIR}/${fallback_name}-local"
+            path="${fallback_path}"
         fi
     elif [[ ! -w "$(dirname "${path}")" ]]; then
-        path="${PROJECT_DIR}/${fallback_name}-local"
+        path="${fallback_path}"
     fi
 
     printf '%s\n' "${path}"
 }
 
-OUTPUT_DIR="$(resolve_output_path "${OUTPUT_DIR}" output)"
-UPDATES_DIR="$(resolve_output_path "${UPDATES_DIR}" updates)"
-
-DOWNLOAD_CACHE_DIR="${DOWNLOAD_CACHE_DIR:-/work/download-cache}"
-if [[ "${DOWNLOAD_CACHE_DIR}" == /work/* ]] && { [[ ! -d /work ]] || [[ ! -w /work ]]; }; then
-    DOWNLOAD_CACHE_DIR="${PROJECT_DIR}/download_cache"
-fi
+OUTPUT_DIR="$(resolve_project_path "${OUTPUT_DIR}" "${PROJECT_TMP_DIR}/output")"
+UPDATES_DIR="$(resolve_project_path "${UPDATES_DIR}" "${PROJECT_TMP_DIR}/updates")"
+WORK_DIR="$(resolve_project_path "${WORK_DIR}" "${PROJECT_TMP_DIR}/work")"
+ROOTFS_DIR="${WORK_DIR}/rootfs"
+RUNTIME_DIR="${WORK_DIR}/runtime"
+ISO_STAGING_DIR="${WORK_DIR}/iso-staging"
+DOWNLOAD_CACHE_DIR="$(resolve_project_path "${DOWNLOAD_CACHE_DIR}" "${PROJECT_TMP_DIR}/download-cache")"
+APT_CACHE_DIR="$(resolve_project_path "${APT_CACHE_DIR}" "${PROJECT_TMP_DIR}/apt-cache")"
 
 # shellcheck source=./build/lib/grub.sh
 source "${BUILD_SCRIPT_DIR}/grub.sh"
@@ -215,7 +211,10 @@ phase_install_and_customize() {
         OPT_CONTEST_DIR="${OPT_CONTEST_DIR}" \
         ICP_REPORT_URL="${ICP_REPORT_URL}" \
         ICP_REPORT_TIMEOUT="${ICP_REPORT_TIMEOUT}" \
-        DOWNLOAD_CACHE_DIR=/work/download-cache
+        STATS_LOG_SINCE="${STATS_LOG_SINCE}" \
+        STATS_REPORT_ON_BOOT="${STATS_REPORT_ON_BOOT}" \
+        STATS_REPORT_INTERVAL="${STATS_REPORT_INTERVAL}" \
+        DOWNLOAD_CACHE_DIR=/tmp/download-cache
 }
 
 phase_trim() {

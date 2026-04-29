@@ -8,11 +8,6 @@ BUILD_SCRIPT="${PROJECT_DIR}/scripts/build.sh"
 # shellcheck source=./config/iso.conf
 source "${PROJECT_DIR}/config/iso.conf"
 
-if [[ -f "${PROJECT_DIR}/config/iso.local.conf" ]]; then
-    # shellcheck source=/dev/null
-    source "${PROJECT_DIR}/config/iso.local.conf"
-fi
-
 run_as_host_user() {
     sudo -u "${SUDO_USER:-${USER}}" "$@"
 }
@@ -27,13 +22,13 @@ resolve_output_dir() {
     local output_dir="${OUTPUT_DIR}"
 
     if [[ "${output_dir}" == /work/* ]] && { [[ ! -d /work ]] || [[ ! -w /work ]]; }; then
-        output_dir="${PROJECT_DIR}/output"
+        output_dir="${PROJECT_TMP_DIR}/output"
     fi
 
     if [[ -e "${output_dir}" && ! -w "${output_dir}" ]]; then
-        output_dir="${PROJECT_DIR}/output-local"
+        output_dir="${PROJECT_TMP_DIR}/output"
     elif [[ ! -e "${output_dir}" && ! -w "$(dirname "${output_dir}")" ]]; then
-        output_dir="${PROJECT_DIR}/output-local"
+        output_dir="${PROJECT_TMP_DIR}/output"
     fi
 
     printf '%s\n' "${output_dir}"
@@ -90,12 +85,6 @@ show_grub_preview() {
     fi
 }
 
-DISK_SIZE_GB="${DISK_SIZE_GB:-20}"
-VM_NAME="icpc-bolivia-debian"
-LAB_DISK_PATH="/var/lib/libvirt/images/icpc-bolivia-debian-lab-hdd.qcow2"
-WIN_XP_DISK="${PROJECT_DIR}/Windows XP.qcow2"
-WIN_XP_VM_NAME="icpc-winxp-lab"
-
 OUTPUT_DIR_RESOLVED="$(resolve_output_dir)"
 ISO_PATH="${ISO_PATH:-$(latest_iso_path "${OUTPUT_DIR_RESOLVED}")}" 
 
@@ -116,6 +105,7 @@ create_lab_disk() {
     }
 
     echo "Creando disco NTFS vacío (${size_gb} GB): ${disk_path}"
+    mkdir -p "$(dirname "${disk_path}")"
     qemu-img create -f qcow2 "${disk_path}" "${size_gb}G"
 
     guestfish -a "${disk_path}" <<'GUESTFISH'
@@ -271,7 +261,7 @@ Acciones:
   run             inicia el entorno de prueba con el ISO más nuevo
   build           construye el ISO y muestra la ruta
   build-run       construye el ISO e inicia el entorno de prueba
-  create-disk     crea el disco NTFS lab
+  create-disk     crea el disco NTFS lab (se usa para probar una imagen de windows xp)
   grub-preview    muestra los archivos GRUB preview
   build-preview   genera preview de GRUB y lo levanta
   help            muestra esta ayuda

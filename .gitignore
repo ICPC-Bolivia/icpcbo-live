@@ -5,6 +5,9 @@
 # Local ISO build configuration
 config/iso.local.conf
 
+# Local build output, caches, and VM disks
+tmp/
+
 # VM disk images
 *.qcow2
 

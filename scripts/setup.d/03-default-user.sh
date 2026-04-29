@@ -2,28 +2,24 @@
 
 set -euo pipefail
 
-DEFAULT_USER_VAL="${DEFAULT_USER:-icpc}"
-DEFAULT_PASSWORD_VAL="${DEFAULT_PASSWORD:-icpc}"
-ENABLE_AUTOLOGIN_VAL="${ENABLE_AUTOLOGIN:-false}"
-
-if ! id -u "${DEFAULT_USER_VAL}" >/dev/null 2>&1; then
-    useradd -m -s /bin/bash "${DEFAULT_USER_VAL}"
+if ! id -u "${DEFAULT_USER}" >/dev/null 2>&1; then
+    useradd -m -s /bin/bash "${DEFAULT_USER}"
 fi
 
 for group in sudo audio video; do
     if getent group "${group}" >/dev/null 2>&1; then
-        usermod -aG "${group}" "${DEFAULT_USER_VAL}"
+        usermod -aG "${group}" "${DEFAULT_USER}"
     fi
 done
 
-echo "${DEFAULT_USER_VAL}:${DEFAULT_PASSWORD_VAL}" | chpasswd
-echo "root:${DEFAULT_PASSWORD_VAL}" | chpasswd
+echo "${DEFAULT_USER}:${DEFAULT_PASSWORD}" | chpasswd
+echo "root:${DEFAULT_PASSWORD}" | chpasswd
 
-if [[ "${ENABLE_AUTOLOGIN_VAL}" == "true" ]]; then
+if [[ "${ENABLE_AUTOLOGIN}" == "true" ]]; then
     mkdir -p /etc/gdm3
     cat > /etc/gdm3/custom.conf <<GDM
 [daemon]
 AutomaticLoginEnable=true
-AutomaticLogin=${DEFAULT_USER_VAL}
+AutomaticLogin=${DEFAULT_USER}
 GDM
 fi

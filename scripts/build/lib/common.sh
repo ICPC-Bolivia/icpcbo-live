@@ -27,18 +27,18 @@ mount_chroot() {
     mount -t sysfs sys "${ROOTFS_DIR}/sys"
     mount -t tmpfs tmpfs "${ROOTFS_DIR}/run"
 
-    local cache_host="${DOWNLOAD_CACHE_DIR:-/work/download-cache}"
-    mkdir -p "${cache_host}" "${ROOTFS_DIR}/work/download-cache"
-    mount --bind "${cache_host}" "${ROOTFS_DIR}/work/download-cache"
+    local cache_host="${DOWNLOAD_CACHE_DIR:?missing DOWNLOAD_CACHE_DIR}"
+    mkdir -p "${cache_host}" "${ROOTFS_DIR}/tmp/download-cache"
+    mount --bind "${cache_host}" "${ROOTFS_DIR}/tmp/download-cache"
 
-    local apt_cache_host="${APT_CACHE_DIR:-/work/apt-cache}"
+    local apt_cache_host="${APT_CACHE_DIR:?missing APT_CACHE_DIR}"
     mkdir -p "${apt_cache_host}" "${ROOTFS_DIR}/var/cache/apt/archives"
     mount --bind "${apt_cache_host}" "${ROOTFS_DIR}/var/cache/apt/archives"
 }
 
 umount_chroot() {
     local mp
-    for mp in var/cache/apt/archives work/download-cache run sys proc dev/pts dev; do
+    for mp in var/cache/apt/archives tmp/download-cache run sys proc dev/pts dev; do
         if mountpoint -q "${ROOTFS_DIR}/${mp}" 2>/dev/null; then
             umount -lf "${ROOTFS_DIR}/${mp}" || true
         fi

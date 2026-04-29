@@ -2,7 +2,7 @@
 
 set -euo pipefail
 
-DEFAULT_USER_VAL="${DEFAULT_USER:-icpc}"
+DEFAULT_USER_VAL="${DEFAULT_USER}"
 CACHE_DIR="/tmp/cache/contestants-vsix"
 
 VSCODE_CPPT_VERSION="1.24.5"

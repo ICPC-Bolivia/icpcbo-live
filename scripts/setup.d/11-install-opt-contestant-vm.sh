@@ -4,8 +4,7 @@ set -euo pipefail
 
 PROFILE_DIR="/tmp/contestants"
 ASSETS_DIR="/tmp/assets/contestants"
-DEST_DIR="${OPT_CONTEST_DIR:-/opt/icpc}"
-DEFAULT_USER_VAL="${DEFAULT_USER:-icpc}"
+DEST_DIR="${OPT_CONTEST_DIR}"
 
 mkdir -p "${DEST_DIR}"
 

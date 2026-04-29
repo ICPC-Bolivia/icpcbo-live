@@ -114,14 +114,14 @@ chroot() {
     printf '%s\n' "$@" > "${captured_chroot_args}"
 }
 
-run_chroot_script "install-and-customize-chroot.sh" HOSTNAME=contest DOWNLOAD_CACHE_DIR=/work/download-cache
+run_chroot_script "install-and-customize-chroot.sh" HOSTNAME=contest DOWNLOAD_CACHE_DIR=/tmp/download-cache
 
 assert_equals "$(cat <<EOF
 ${ROOTFS_DIR}
 env
 DEBIAN_FRONTEND=noninteractive
 HOSTNAME=contest
-DOWNLOAD_CACHE_DIR=/work/download-cache
+DOWNLOAD_CACHE_DIR=/tmp/download-cache
 /bin/bash
 -eux
 /tmp/install-and-customize-chroot.sh

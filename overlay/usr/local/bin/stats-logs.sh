@@ -3,7 +3,14 @@
 set -euo pipefail
 
 NOW="$(date --utc +%Y-%m-%dT%H:%M:%SZ)"
-SINCE="10 minutes ago"
+
+if [[ -f /etc/contestiso/stats.env ]]; then
+    # shellcheck source=/dev/null
+    source /etc/contestiso/stats.env
+fi
+
+: "${STATS_LOG_SINCE:?STATS_LOG_SINCE is required}"
+SINCE="${STATS_LOG_SINCE}"
 
 mkdir -p /var/lib/statsbo
 

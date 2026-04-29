@@ -7,6 +7,20 @@
 
 set -euo pipefail
 
+cat > /etc/systemd/system/stats-report.timer <<TIMER
+[Unit]
+Description=Run stats report every ${STATS_REPORT_INTERVAL}
+
+[Timer]
+OnBootSec=${STATS_REPORT_ON_BOOT}
+OnUnitActiveSec=${STATS_REPORT_INTERVAL}
+Persistent=true
+Unit=stats-report.service
+
+[Install]
+WantedBy=timers.target
+TIMER
+
 systemctl enable contest-full-install.service
 systemctl enable contest-deploy.service
 systemctl enable contest-overlay-provision.service

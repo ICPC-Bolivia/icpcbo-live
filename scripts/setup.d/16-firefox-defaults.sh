@@ -3,7 +3,6 @@
 set -euo pipefail
 
 FIREFOX_DIR="/usr/lib/firefox-esr"
-DEFAULT_BROWSER_URL_VAL="${DEFAULT_BROWSER_URL:-file:///usr/share/doc/icpcbo/index.html}"
 
 if [ ! -d "${FIREFOX_DIR}" ]; then
     echo "W: firefox-esr not found at ${FIREFOX_DIR}, skipping Firefox defaults" >&2
@@ -22,7 +21,7 @@ EOF
 # (Firefox omite la primera línea que no sea comentario; por eso se empieza con comentario)
 cat > "${FIREFOX_DIR}/icpcbo.cfg" <<EOF
 // Default homepage: local contest documentation
-defaultPref("browser.startup.homepage", "${DEFAULT_BROWSER_URL_VAL}");
+defaultPref("browser.startup.homepage", "${DEFAULT_BROWSER_URL}");
 defaultPref("browser.startup.page", 1);
 
 // Disable telemetry and reporting

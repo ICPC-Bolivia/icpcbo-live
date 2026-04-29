@@ -9,19 +9,14 @@ BUILD_SCRIPT="${SCRIPT_DIR}/build.sh"
 # shellcheck source=../config/iso.conf
 source "${PROJECT_DIR}/config/iso.conf"
 
-if [[ -f "${PROJECT_DIR}/config/iso.local.conf" ]]; then
-    # shellcheck source=/dev/null
-    source "${PROJECT_DIR}/config/iso.local.conf"
-fi
-
 if [[ "${OUTPUT_DIR}" == /work/* ]] && { [[ ! -d /work ]] || [[ ! -w /work ]]; }; then
-    OUTPUT_DIR="${PROJECT_DIR}/output"
+    OUTPUT_DIR="${PROJECT_TMP_DIR}/output"
 fi
 
 if [[ -e "${OUTPUT_DIR}" && ! -w "${OUTPUT_DIR}" ]]; then
-    OUTPUT_DIR="${PROJECT_DIR}/output-local"
+    OUTPUT_DIR="${PROJECT_TMP_DIR}/output"
 elif [[ ! -e "${OUTPUT_DIR}" && ! -w "$(dirname "${OUTPUT_DIR}")" ]]; then
-    OUTPUT_DIR="${PROJECT_DIR}/output-local"
+    OUTPUT_DIR="${PROJECT_TMP_DIR}/output"
 fi
 
 GRUB_PREVIEW_DIR="${OUTPUT_DIR}/grub-preview"

@@ -2,8 +2,8 @@
 
 set -euo pipefail
 
-DEFAULT_USER_VAL="${DEFAULT_USER:-icpc}"
-OPT_DIR="${OPT_CONTEST_DIR:-/opt/icpc}"
+DEFAULT_USER_VAL="${DEFAULT_USER}"
+OPT_DIR="${OPT_CONTEST_DIR}"
 
 # ----------------------------------------------------------------
 # Configuración de /etc/skel

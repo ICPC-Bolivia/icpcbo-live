@@ -2,17 +2,13 @@
 
 set -euo pipefail
 
-TIMEOUT="10"
-ICP_REPORT_URL=""
-
-if [[ -f /etc/contestiso/auth.env ]]; then
+if [[ -f /etc/contestiso/stats.env ]]; then
     # shellcheck source=/dev/null
-    source /etc/contestiso/auth.env
+    source /etc/contestiso/stats.env
 fi
 
-TIMEOUT="${ICP_REPORT_TIMEOUT:-${TIMEOUT}}"
-
 : "${ICP_REPORT_URL:?ICP_REPORT_URL is required}"
+: "${ICP_REPORT_TIMEOUT:?ICP_REPORT_TIMEOUT is required}"
 
 mkdir -p /var/lib/statsbo/pending
 
@@ -37,7 +33,7 @@ trap cleanup EXIT
     "${HARDWARE_FILE}" \
     "/home/icpc/.local/state/icpcbo" > "${DATA_FILE}"
 
-if ! curl --fail --silent --show-error --max-time "${TIMEOUT}" \
+if ! curl --fail --silent --show-error --max-time "${ICP_REPORT_TIMEOUT}" \
     -X POST -H "Content-Type: application/json" \
     -d @"${DATA_FILE}" "${ICP_REPORT_URL}"; then
     mv "${DATA_FILE}" "/var/lib/statsbo/pending/$(date +%s).json"
@@ -47,7 +43,7 @@ fi
 
 for f in /var/lib/statsbo/pending/*.json; do
     [[ ! -f "${f}" ]] && continue
-    if curl --fail --silent --show-error --max-time "${TIMEOUT}" \
+    if curl --fail --silent --show-error --max-time "${ICP_REPORT_TIMEOUT}" \
         -X POST -H "Content-Type: application/json" \
         -d @"${f}" "${ICP_REPORT_URL}"; then
         rm -f "${f}"

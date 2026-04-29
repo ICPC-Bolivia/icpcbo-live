@@ -2,8 +2,7 @@
 
 set -euo pipefail
 
-GNOME_INPUT_SOURCES_VAL="${GNOME_INPUT_SOURCES:-[('xkb', 'latam'), ('xkb', 'us')]}"
-OPT_DIR="${OPT_CONTEST_DIR:-/opt/icpc}"
+OPT_DIR="${OPT_CONTEST_DIR}"
 
 # Configura el perfil de sistema de dconf para que GNOME lea la base de datos del sistema
 mkdir -p /etc/dconf/profile
@@ -25,7 +24,7 @@ EOF
 cat >> /etc/dconf/db/local.d/20-contestant-defaults <<EOF
 
 [org/gnome/desktop/input-sources]
-sources=${GNOME_INPUT_SOURCES_VAL}
+sources=${GNOME_INPUT_SOURCES}
 per-window=false
 
 EOF

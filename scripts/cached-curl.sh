@@ -9,7 +9,7 @@ fi
 
 url="$1"
 output="$2"
-cache_dir="${DOWNLOAD_CACHE_DIR:-/work/download-cache}"
+cache_dir="${DOWNLOAD_CACHE_DIR:-/tmp/download-cache}"
 connections="${DOWNLOAD_CONNECTIONS:-8}"
 
 url_hash="$(printf '%s' "${url}" | sha256sum | cut -c1-16)"
