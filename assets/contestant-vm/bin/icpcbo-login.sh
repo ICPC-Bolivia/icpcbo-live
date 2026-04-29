@@ -11,6 +11,9 @@ DISPLAY_FILE="/home/icpc/.local/state/icpcbo/display-name.txt"
 RAW_RESPONSE_FILE="/home/icpc/.local/state/icpcbo/auth-response.json"
 WALLPAPER_FILE="/home/icpc/.local/state/icpcbo/login-wallpaper.svg"
 AUTH_ENV_FILE="/etc/contestiso/auth.env"
+BUILD_PAYLOAD_PY="/opt/icpc/bin/icpcbo-login-build-payload.py"
+PARSE_RESPONSE_PY="/opt/icpc/bin/icpcbo-login-parse-response.py"
+WRITE_WALLPAPER_PY="/opt/icpc/bin/icpcbo-login-write-wallpaper.py"
 
 AUTH_SERVICE_URL="${AUTH_SERVICE_URL:-}"
 AUTH_SERVICE_TIMEOUT="${AUTH_SERVICE_TIMEOUT:-5}"
@@ -36,24 +39,7 @@ build_payload() {
     local username="$1"
     local password="$2"
 
-    python3 - "$username" "$password" <<'PY'
-import json
-import os
-import sys
-
-machine_id = "unknown"
-if os.path.exists("/etc/machine-id"):
-    with open("/etc/machine-id", encoding="utf-8") as fh:
-        machine_id = fh.read().strip() or "unknown"
-
-payload = {
-    "username": sys.argv[1],
-    "password": sys.argv[2],
-    "machineId": machine_id,
-}
-
-print(json.dumps(payload, ensure_ascii=False))
-PY
+    python3 "${BUILD_PAYLOAD_PY}" "${username}" "${password}"
 }
 
 parse_response_env() {
@@ -61,102 +47,14 @@ parse_response_env() {
     local http_code="$2"
     local username="$3"
 
-    python3 - "$response_file" "$http_code" "$username" <<'PY'
-import json
-import shlex
-import sys
-
-response_file, http_code, username = sys.argv[1], int(sys.argv[2]), sys.argv[3]
-raw = ""
-
-try:
-    with open(response_file, encoding="utf-8") as fh:
-        raw = fh.read()
-except FileNotFoundError:
-    pass
-
-ok = False
-message = ""
-user_id = username
-display_name = username
-
-if 200 <= http_code < 300:
-    try:
-        data = json.loads(raw or "{}")
-    except json.JSONDecodeError:
-        message = "El servicio respondió con un formato JSON inválido."
-    else:
-        ok_value = data.get("ok", data.get("valid"))
-        if ok_value is None:
-            ok_value = str(data.get("status", "")).lower() in {
-                "ok",
-                "success",
-                "valid",
-            }
-
-        ok = bool(ok_value)
-        message = str(data.get("message") or data.get("detail") or "")
-        user_id = str(
-            data.get("userId")
-            or data.get("user_id")
-            or data.get("id")
-            or username
-        )
-        display_name = str(
-            data.get("displayName")
-            or data.get("display_name")
-            or data.get("name")
-            or username
-        )
-else:
-    message = f"El servicio respondió con HTTP {http_code}."
-
-if not ok and not message:
-    message = "Las credenciales no fueron aceptadas."
-
-print(f"AUTH_OK={shlex.quote('1' if ok else '0')}")
-print(f"AUTH_MESSAGE={shlex.quote(message)}")
-print(f"AUTH_USER_ID={shlex.quote(user_id)}")
-print(f"AUTH_DISPLAY_NAME={shlex.quote(display_name)}")
-PY
+    python3 "${PARSE_RESPONSE_PY}" "${response_file}" "${http_code}" "${username}"
 }
 
 write_wallpaper() {
     local display_name="$1"
     local user_id="$2"
 
-    python3 - "$display_name" "$user_id" "$WALLPAPER_FILE" <<'PY'
-from html import escape
-from pathlib import Path
-import sys
-
-name = sys.argv[1].strip() or "Contestant"
-user_id = sys.argv[2].strip()
-output = Path(sys.argv[3])
-output.parent.mkdir(parents=True, exist_ok=True)
-
-font_size = 100
-if len(name) > 18:
-    font_size = 80
-if len(name) > 28:
-    font_size = 64
-
-subtitle = f"ID: {user_id}" if user_id else "ICPC Bolivia"
-
-svg = f"""<?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" width="1920" height="1080" viewBox="0 0 1920 1080">
-  <rect width="1920" height="1080" fill="#000000"/>
-  <text x="960" y="460" fill="#f4f0dd" font-family="Share, Fira Sans, sans-serif"
-        font-size="36" text-anchor="middle" letter-spacing="8">ICPC BOLIVIA</text>
-  <text x="960" y="590" fill="#ffffff" font-family="Fira Sans, sans-serif"
-        font-size="{font_size}" font-weight="700" text-anchor="middle">{escape(name)}</text>
-  <text x="960" y="670" fill="#8f9aa3" font-family="Fira Sans, sans-serif"
-        font-size="30" text-anchor="middle">{escape(subtitle)}</text>
-</svg>
-"""
-
-output.write_text(svg, encoding="utf-8")
-PY
+    python3 "${WRITE_WALLPAPER_PY}" "${display_name}" "${user_id}" "${WALLPAPER_FILE}"
 }
 
 apply_wallpaper() {
