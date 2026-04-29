@@ -2,7 +2,7 @@
 
 set -euo pipefail
 
-PROFILE_DIR="/tmp/contestant-vm"
+PROFILE_DIR="/tmp/contestants"
 LOCAL_DOC_SRC="/tmp/assets/html"
 CACHE_DIR="/tmp/cache"
 DOC_DST="/usr/share/doc/icpcbo"

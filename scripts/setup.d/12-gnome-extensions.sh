@@ -2,7 +2,7 @@
 
 set -euo pipefail
 
-PROFILE_DIR="/tmp/contestant-vm"
+PROFILE_DIR="/tmp/contestants"
 EXT_SRC="${PROFILE_DIR}/files/misc"
 LOCAL_EXT_SRC="/tmp/assets/gnome-extensions"
 EXT_DST="/usr/share/gnome-shell/extensions"

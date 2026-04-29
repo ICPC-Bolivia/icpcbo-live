@@ -2,8 +2,8 @@
 
 set -euo pipefail
 
-PROFILE_DIR="/tmp/contestant-vm"
-ASSETS_DIR="/tmp/assets/contestant-vm"
+PROFILE_DIR="/tmp/contestants"
+ASSETS_DIR="/tmp/assets/contestants"
 DEST_DIR="${OPT_CONTEST_DIR:-/opt/icpc}"
 DEFAULT_USER_VAL="${DEFAULT_USER:-icpc}"
 

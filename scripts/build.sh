@@ -106,9 +106,9 @@ copy_repo_assets() {
     fi
 
     if [[ -f "${PROJECT_DIR}/icpcbo-wallpaper.png" ]]; then
-        mkdir -p "${dst}/contestant-vm/misc"
+        mkdir -p "${dst}/contestants/misc"
         cp "${PROJECT_DIR}/icpcbo-wallpaper.png" \
-            "${dst}/contestant-vm/misc/icpcbo-wallpaper.png"
+            "${dst}/contestants/misc/icpcbo-wallpaper.png"
     fi
 }
 

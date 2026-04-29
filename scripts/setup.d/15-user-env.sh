@@ -66,12 +66,12 @@ fi
 # Sudoers: permitir que el usuario concursante ejecute
 # herramientas del concurso como root
 # ----------------------------------------------------------------
-cat > /etc/sudoers.d/contestant-vm <<SUDO
+cat > /etc/sudoers.d/icpc <<SUDO
 ${DEFAULT_USER_VAL} ALL=(root) NOPASSWD: ${OPT_DIR}/bin/icpcboconf.sh
 ${DEFAULT_USER_VAL} ALL=(root) NOPASSWD: ${OPT_DIR}/bin/icpcbobackup.sh
 ${DEFAULT_USER_VAL} ALL=(root) NOPASSWD: ${OPT_DIR}/sbin/contest.sh
 SUDO
-chmod 440 /etc/sudoers.d/contestant-vm
+chmod 440 /etc/sudoers.d/icpc
 
 # ----------------------------------------------------------------
 # Aplicar directamente al usuario que ya existe dentro del chroot
