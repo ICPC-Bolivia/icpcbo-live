@@ -9,3 +9,4 @@ systemctl enable contest-full-install.service
 systemctl enable contest-deploy.service
 systemctl enable contest-overlay-provision.service
 systemctl enable contest-update.service
+systemctl enable icp-report.timer

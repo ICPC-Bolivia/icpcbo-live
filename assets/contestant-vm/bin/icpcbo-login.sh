@@ -6,6 +6,7 @@ ZEN_TITLE="ICPC Bolivia"
 ZEN_WIDTH="--width=420"
 STATE_DIR="${XDG_STATE_HOME:-${HOME}/.local/state}/icpcbo"
 STATE_FILE="${STATE_DIR}/user-id.txt"
+USERNAME_FILE="${STATE_DIR}/username.txt"
 DISPLAY_FILE="${STATE_DIR}/display-name.txt"
 RAW_RESPONSE_FILE="${STATE_DIR}/auth-response.json"
 WALLPAPER_FILE="${STATE_DIR}/login-wallpaper.svg"
@@ -38,14 +39,17 @@ build_payload() {
     python3 - "$username" "$password" <<'PY'
 import json
 import os
-import socket
 import sys
+
+machine_id = "unknown"
+if os.path.exists("/etc/machine-id"):
+    with open("/etc/machine-id", encoding="utf-8") as fh:
+        machine_id = fh.read().strip() or "unknown"
 
 payload = {
     "username": sys.argv[1],
     "password": sys.argv[2],
-    "hostname": socket.gethostname(),
-    "machineId": os.environ.get("XDG_SESSION_ID", ""),
+    "machineId": machine_id,
 }
 
 print(json.dumps(payload, ensure_ascii=False))
@@ -164,18 +168,20 @@ apply_wallpaper() {
 }
 
 persist_login_state() {
-    local user_id="$1"
-    local display_name="$2"
-    local response_file="$3"
+    local username="$1"
+    local user_id="$2"
+    local display_name="$3"
+    local response_file="$4"
 
     mkdir -p "${STATE_DIR}"
+    printf '%s\n' "${username}" > "${USERNAME_FILE}"
     printf '%s\n' "${user_id}" > "${STATE_FILE}"
     printf '%s\n' "${display_name}" > "${DISPLAY_FILE}"
     cp "${response_file}" "${RAW_RESPONSE_FILE}"
 }
 
 authenticate() {
-    local username="$1"
+    local user_id="$1"
     local password="$2"
     local payload response_file env_file http_code curl_rc
 
@@ -183,7 +189,7 @@ authenticate() {
     env_file="$(mktemp)"
     curl_rc=0
 
-    payload="$(build_payload "${username}" "${password}")"
+    payload="$(build_payload "${user_id}" "${password}")"
     http_code="$(curl \
         --silent --show-error \
         --max-time "${AUTH_SERVICE_TIMEOUT}" \
@@ -200,7 +206,7 @@ authenticate() {
         return 2
     fi
 
-    parse_response_env "${response_file}" "${http_code}" "${username}" > "${env_file}"
+    parse_response_env "${response_file}" "${http_code}" "${user_id}" > "${env_file}"
     # shellcheck source=/dev/null
     source "${env_file}"
 
@@ -213,9 +219,9 @@ authenticate() {
 
     write_wallpaper "${AUTH_DISPLAY_NAME}" "${AUTH_USER_ID}"
     apply_wallpaper
-    persist_login_state "${AUTH_USER_ID}" "${AUTH_DISPLAY_NAME}" "${response_file}"
+    persist_login_state "${user_id}" "${AUTH_USER_ID}" "${AUTH_DISPLAY_NAME}" "${response_file}"
     if command -v logger >/dev/null 2>&1; then
-        logger -p local0.info "ICPCBO-LOGIN: authenticated user ${AUTH_USER_ID}"
+        logger -p local0.info "ICPCBO-LOGIN: authenticated username ${user_id} with id ${AUTH_USER_ID}"
     fi
 
     rm -f "${response_file}" "${env_file}"

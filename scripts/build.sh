@@ -213,6 +213,9 @@ phase_install_and_customize() {
         AUTH_SERVICE_URL="${AUTH_SERVICE_URL}" \
         AUTH_SERVICE_TIMEOUT="${AUTH_SERVICE_TIMEOUT}" \
         OPT_CONTEST_DIR="${OPT_CONTEST_DIR}" \
+        ICP_REPORT_URL="${ICP_REPORT_URL}" \
+        ICP_REPORT_TIMEOUT="${ICP_REPORT_TIMEOUT}" \
+        ICP_REPORT_BACKEND_HOST="${ICP_REPORT_BACKEND_HOST}" \
         DOWNLOAD_CACHE_DIR=/work/download-cache
 }
 

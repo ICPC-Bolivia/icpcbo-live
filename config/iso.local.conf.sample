@@ -12,6 +12,10 @@ UPDATE_MANIFEST_URL="http://localhost:8081/updates/manifest.json"
 UPDATE_CHECK_ON_BOOT="true"
 RUNTIME_VERSION="dev"
 
+AUTH_SERVICE_URL=""
+AUTH_SERVICE_TIMEOUT="6000"
+ICP_REPORT_BACKEND_HOST="127.0.0.1"
+
 # Optional local overrides
 # DEFAULT_BROWSER_URL="https://global.naquadah.com.br/boca"
 # GNOME_INPUT_SOURCES="[('xkb', 'latam'), ('xkb', 'br'), ('xkb', 'us')]"
