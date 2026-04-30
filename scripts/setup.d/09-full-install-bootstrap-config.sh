@@ -2,8 +2,6 @@
 
 set -euo pipefail
 
-: "${FULL_INSTALL_URL:?FULL_INSTALL_URL is required}"
-
 install -d -m 0755 /etc/contestiso
 {
     printf 'FULL_INSTALL_URL=%q\n' "${FULL_INSTALL_URL}"

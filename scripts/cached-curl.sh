@@ -9,8 +9,8 @@ fi
 
 url="$1"
 output="$2"
-cache_dir="${DOWNLOAD_CACHE_DIR:-/tmp/download-cache}"
-connections="${DOWNLOAD_CONNECTIONS:-8}"
+cache_dir="${DOWNLOAD_CACHE_DIR}"
+connections="${DOWNLOAD_CONNECTIONS}"
 
 url_hash="$(printf '%s' "${url}" | sha256sum | cut -c1-16)"
 url_base="$(basename "${url%%\?*}" | tr -cs 'a-zA-Z0-9._-' '_' | cut -c1-80)"

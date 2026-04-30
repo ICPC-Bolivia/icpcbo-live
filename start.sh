@@ -86,7 +86,9 @@ show_grub_preview() {
 }
 
 OUTPUT_DIR_RESOLVED="$(resolve_output_dir)"
-ISO_PATH="${ISO_PATH:-$(latest_iso_path "${OUTPUT_DIR_RESOLVED}")}" 
+if [[ -z "${ISO_PATH}" ]]; then
+    ISO_PATH="$(latest_iso_path "${OUTPUT_DIR_RESOLVED}")"
+fi
 
 create_lab_disk() {
     local disk_path="${1:-${LAB_DISK_PATH}}"
@@ -207,28 +209,31 @@ launch_winxp() {
 }
 
 start_apt_cacher() {
-    if curl -s --max-time 2 http://localhost:3142 >/dev/null 2>&1; then
+    if [[ -z "${APT_PROXY}" ]]; then
+        echo "[apt-cacher] Caché APT deshabilitado en config/iso.conf"
+        return 0
+    fi
+
+    if curl -s --max-time 2 "${APT_PROXY}" >/dev/null 2>&1; then
         echo "[apt-cacher] Caché ya activo"
-        export APT_PROXY="http://localhost:3142"
         return 0
     fi
 
     echo "[apt-cacher] Iniciando caché apt..."
     run_as_host_user docker compose -f "${PROJECT_DIR}/docker-compose.yml" up -d apt-cacher >/dev/null 2>&1 || {
         echo "[apt-cacher] WARN: no se pudo iniciar el caché" >&2
-        return 0
+        return 1
     }
 
     local i=0
     echo -n "[apt-cacher] Esperando"
-    while ! curl -s --max-time 1 http://localhost:3142 >/dev/null 2>&1; do
+    while ! curl -s --max-time 1 "${APT_PROXY}" >/dev/null 2>&1; do
         sleep 1
         i=$(( i + 1 ))
         echo -n "."
-        [[ "${i}" -ge 20 ]] && { echo " timeout"; return 0; }
+        [[ "${i}" -ge 20 ]] && { echo " timeout"; return 1; }
     done
     echo " listo"
-    export APT_PROXY="http://localhost:3142"
 }
 
 build_target() {
@@ -274,7 +279,8 @@ run_start_action() {
 
     case "${action}" in
         run)
-            selected_iso="${ISO_PATH:-$(latest_iso_path "${OUTPUT_DIR_RESOLVED}")}"
+            selected_iso="${ISO_PATH}"
+            [[ -n "${selected_iso}" ]] || selected_iso="$(latest_iso_path "${OUTPUT_DIR_RESOLVED}")"
             require_iso "${selected_iso}"
             launch_winxp 1 "${selected_iso}"
             ;;

@@ -152,13 +152,18 @@ phase_prepare() {
 
     log "Work dir: ${WORK_DIR}"
     log "Rootfs:   ${ROOTFS_DIR}"
+    if [[ -n "${APT_PROXY}" ]]; then
+        log "APT proxy: ${APT_PROXY}"
+    else
+        warn "APT proxy disabled; debootstrap and apt will download directly"
+    fi
 }
 
 phase_bootstrap() {
     phase "10 Bootstrap Debian (${DEBIAN_SUITE})"
 
     local debootstrap_env=()
-    if [[ -n "${APT_PROXY:-}" ]]; then
+    if [[ -n "${APT_PROXY}" ]]; then
         debootstrap_env=(env http_proxy="${APT_PROXY}" https_proxy="${APT_PROXY}")
     fi
     "${debootstrap_env[@]}" debootstrap --arch="${ARCH}" --variant=minbase \
@@ -190,6 +195,7 @@ phase_install_and_customize() {
     run_chroot_script "install-and-customize-chroot.sh" \
         HOSTNAME="${HOSTNAME}" \
         LOCALE="${LOCALE}" \
+        SUPPORTED_LOCALES="${SUPPORTED_LOCALES}" \
         TIMEZONE="${TIMEZONE}" \
         KEYBOARD_LAYOUT="${KEYBOARD_LAYOUT}" \
         DEFAULT_USER="${DEFAULT_USER}" \
@@ -214,7 +220,8 @@ phase_install_and_customize() {
         STATS_LOG_SINCE="${STATS_LOG_SINCE}" \
         STATS_REPORT_ON_BOOT="${STATS_REPORT_ON_BOOT}" \
         STATS_REPORT_INTERVAL="${STATS_REPORT_INTERVAL}" \
-        DOWNLOAD_CACHE_DIR=/tmp/download-cache
+        DOWNLOAD_CACHE_DIR=/tmp/download-cache \
+        DOWNLOAD_CONNECTIONS="${DOWNLOAD_CONNECTIONS}"
 }
 
 phase_trim() {
@@ -348,8 +355,8 @@ phase_build_iso() {
 
     # La carpeta runtime (squashfs + kernel + initrd) ya está embebida en el
     # ISO. Copiarla por separado a output/ consume otros 3+ GB en el volumen
-    # del host. Define OUTPUT_RUNTIME=1 si quieres habilitar esa copia extra.
-    if [[ "${OUTPUT_RUNTIME:-0}" == "1" ]]; then
+    # del host. Habilita OUTPUT_RUNTIME en config/iso.conf si quieres esa copia extra.
+    if [[ "${OUTPUT_RUNTIME}" == "1" ]]; then
         rm -rf "${OUTPUT_DIR}/${CONTEST_DIR}"
         cp -a "${runtime_target}" "${OUTPUT_DIR}/"
         log "Runtime:  ${OUTPUT_DIR}/${CONTEST_DIR}"
@@ -360,7 +367,7 @@ phase_build_iso() {
 }
 
 publish_runtime_version() {
-    if [[ -n "${RUNTIME_VERSION:-}" && "${RUNTIME_VERSION}" != "dev" ]]; then
+    if [[ -n "${RUNTIME_VERSION}" && "${RUNTIME_VERSION}" != "dev" ]]; then
         printf '%s\n' "${RUNTIME_VERSION}"
     else
         date -u +%Y%m%d%H%M%S

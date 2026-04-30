@@ -46,6 +46,10 @@ unset META_DISTRO_VERSION
 unset CONTEST_DIR
 unset HOSTNAME
 unset SUPPORTED_LOCALES
+unset DOWNLOAD_CONNECTIONS
+unset OUTPUT_RUNTIME
+unset ISO_PATH
+unset APT_PROXY
 
 # shellcheck source=/dev/null
 source "${PROJECT_DIR}/config/iso.conf"
@@ -58,13 +62,10 @@ assert_equals "13" "${META_DISTRO_VERSION}" "META_DISTRO_VERSION"
 assert_equals "icpc_bo" "${CONTEST_DIR}" "CONTEST_DIR"
 assert_equals "contest" "${HOSTNAME}" "HOSTNAME"
 assert_equals "en_US.UTF-8 es_ES.UTF-8 es_BO.UTF-8" "${SUPPORTED_LOCALES}" "SUPPORTED_LOCALES"
-
-(
-    APT_PROXY="http://proxy.example:3142"
-    # shellcheck source=/dev/null
-    source "${PROJECT_DIR}/config/iso.conf"
-    assert_equals "http://proxy.example:3142" "${APT_PROXY}" "APT_PROXY environment override"
-)
+assert_equals "8" "${DOWNLOAD_CONNECTIONS}" "DOWNLOAD_CONNECTIONS"
+assert_equals "0" "${OUTPUT_RUNTIME}" "OUTPUT_RUNTIME"
+assert_equals "" "${ISO_PATH}" "ISO_PATH"
+assert_equals "http://localhost:3142" "${APT_PROXY}" "APT_PROXY"
 
 assert_file "scripts/setup.d/05-desktop-defaults.sh"
 assert_file "scripts/setup.d/09-full-install-bootstrap-config.sh"
