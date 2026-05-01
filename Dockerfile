@@ -7,6 +7,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     ca-certificates \
     coreutils \
     curl \
+    wget \
+    axel \
     debootstrap \
     dosfstools \
     file \

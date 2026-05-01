@@ -54,6 +54,7 @@ console-setup
 efibootmgr
 grub-efi-amd64
 grub-pc-bin
+
 # Full-install tools (unsquashfs + partitioning)
 squashfs-tools
 parted
@@ -68,6 +69,8 @@ xvfb
 oathtool
 imagemagick
 zabbix-agent2
+wget
+axel
 
 # --- Build tools ---
 build-essential
