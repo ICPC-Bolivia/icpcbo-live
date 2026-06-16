@@ -2,6 +2,11 @@
 
 Repositorio para construir la ISO Debian personalizada del entorno ICPC Bolivia.
 
+# Quiero probar el ultimo Release sin tener que compilar
+En el siguiente drive se subira los ultimos isos, actualmente tenemos disponible para escritorios Gnome y Xfce 4
+
+[Link del drive](https://drive.google.com/drive/folders/1V4aotPbnwvc3KpIkdwUbIUNvwZ3ggsdO)
+
 ## Requisitos
 
 Los comandos de build usan `debootstrap`, `chroot`, mounts y generación de ISO, por eso deben ejecutarse en Linux y normalmente con `sudo`.
